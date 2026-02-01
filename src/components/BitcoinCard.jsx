@@ -5,24 +5,24 @@ export default function BitcoinCard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const REFRESH_TIME = 15000; // 15 segundos
-
   async function fetchBitcoin() {
     try {
+      setLoading(true);
       setError(false);
 
-      const response = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl"
+      const res = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+        { cache: "no-store" }
       );
 
-      if (!response.ok) throw new Error("Erro na API");
+      if (!res.ok) throw new Error("API error");
 
-      const data = await response.json();
-      setPrice(data.bitcoin.brl);
-      setLoading(false);
+      const data = await res.json();
+      setPrice(data.bitcoin.usd);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao buscar Bitcoin:", err);
       setError(true);
+    } finally {
       setLoading(false);
     }
   }
@@ -30,21 +30,33 @@ export default function BitcoinCard() {
   useEffect(() => {
     fetchBitcoin();
 
-    const interval = setInterval(fetchBitcoin, REFRESH_TIME);
-
+    // 🔄 Atualiza a cada 30 segundos
+    const interval = setInterval(fetchBitcoin, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) return <p>Carregando Bitcoin...</p>;
-  if (error) return <p>Erro ao carregar o preço do Bitcoin</p>;
+  /* ---------- UI STATES ---------- */
+
+  if (loading) {
+    return <p>⏳ Carregando preço do Bitcoin...</p>;
+  }
+
+  if (error) {
+    return (
+      <div>
+        <p style={{ color: "red" }}>⚠️ Erro ao carregar Bitcoin</p>
+        <button onClick={fetchBitcoin}>🔄 Tentar novamente</button>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h3>Bitcoin (BRL)</h3>
-      <p style={{ fontSize: 24, fontWeight: "bold" }}>
-        R$ {price.toLocaleString("pt-BR")}
+      <h3>Bitcoin (USD)</h3>
+      <p style={{ fontSize: 28, fontWeight: "bold" }}>
+        ${price.toLocaleString()}
       </p>
-      <small>Atualiza a cada 15 segundos</small>
+      <small>Atualiza a cada 30s</small>
     </div>
   );
 }

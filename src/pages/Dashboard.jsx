@@ -1,15 +1,10 @@
-/* ================== IMPORTS ================== */
 import { useState } from "react";
-
 import { useAuth } from "../auth/AuthContext";
 import { ROLES } from "../auth/roles";
-
 import ChartJSChart from "../components/ChartJSChart";
 import BitcoinCard from "../components/BitcoinCard";
-
 import { dashboardData } from "../data/dashboardData";
 
-/* ================== COMPONENT ================== */
 export default function Dashboard() {
   const [dark, setDark] = useState(false);
   const { user, logout } = useAuth();
